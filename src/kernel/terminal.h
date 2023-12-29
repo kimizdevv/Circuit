@@ -11,7 +11,7 @@ struct terminal {
         uint16_t *buffer;
 };
 
-struct terminal term_get(void);
+struct terminal term_init(void);
 
 void term_putentryat(struct terminal term, char c);
 

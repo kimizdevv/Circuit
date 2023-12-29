@@ -2,7 +2,7 @@
 #include "vga.h"
 #include "../lib/sys/string.h"
 
-struct terminal term_get(void)
+struct terminal term_init(void)
 {
         const size_t VGA_WIDTH = 80;
         const size_t VGA_HEIGHT = 25;
