@@ -18,31 +18,51 @@ struct terminal term_init(void)
 
         for (size_t y = 0; y < term.height; ++y)
                 for (size_t x = 0; x < term.width; ++x)
-                        term_putentryat(term, ' ');
+                        term_putentryat(&term, ' ');
 
         return term;
 }
 
-void term_putentryat(struct terminal term, const char c)
+void term_putentryat(struct terminal *term, const char c)
 {
-        const size_t idx = term.row * term.width + term.column;
-        term.buffer[idx] = vga_entry(c, term.color);
+        const size_t idx = term->row * term->width + term->column;
+        term->buffer[idx] = vga_entry(c, term->color);
 }
 
-static void term_autowrap(struct terminal term)
+static void term_newline(struct terminal *term)
 {
-        if (term.column == term.width) {
-                term.column = 0;
-                term.row++;
+        term->column = 0;
+        term->row++;
+}
+
+static void term_autowrap(struct terminal *term)
+{
+        if (term->column == term->width)
+                term_newline(term);
+}
+
+static _Bool term_checkspecial(struct terminal *term, const char c)
+{
+        switch (c) {
+        case '\n':
+                term_newline(term);
+                return 1;
+        default:
+                return 0;
         }
 }
 
-void term_putstr(struct terminal term, const char *s)
+void term_putstr(struct terminal *term, const char *s)
 {
         for (size_t i = 0; i < strlen(s); ++i) {
-                term_autowrap(term);
-                term_putentryat(term, s[i]);
+                const char c = s[i];
 
-                term.column++;
+                if (term_checkspecial(term, c))
+                        continue;
+
+                term_autowrap(term);
+
+                term_putentryat(term, c);
+                term->column++;
         }
 }
