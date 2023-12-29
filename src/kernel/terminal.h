@@ -15,6 +15,8 @@ struct terminal term_init(void);
 
 void term_putentryat(struct terminal *term, char c);
 
+void term_putchr(struct terminal *term, char c);
+
 void term_putstr(struct terminal *term, const char *s);
 
 #endif

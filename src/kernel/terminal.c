@@ -23,22 +23,34 @@ struct terminal term_init(void)
         return term;
 }
 
+static void term_newline(struct terminal *term)
+{
+        term->column = 0;
+        term->row++;
+}
+static void term_autowrap(struct terminal *term)
+{
+        if (term->column == term->width)
+                term_newline(term);
+}
+
 void term_putentryat(struct terminal *term, const char c)
 {
         const size_t idx = term->row * term->width + term->column;
         term->buffer[idx] = vga_entry(c, term->color);
 }
 
-static void term_newline(struct terminal *term)
+void term_putchr(struct terminal *term, const char c)
 {
-        term->column = 0;
-        term->row++;
-}
-
-static void term_autowrap(struct terminal *term)
-{
-        if (term->column == term->width)
+        if (c == '\n') {
                 term_newline(term);
+                return;
+        }
+
+        term_putentryat(term, c);
+        term->column++;
+
+        term_autowrap(term);
 }
 
 static _Bool term_checkspecial(struct terminal *term, const char c)
@@ -54,15 +66,6 @@ static _Bool term_checkspecial(struct terminal *term, const char c)
 
 void term_putstr(struct terminal *term, const char *s)
 {
-        for (size_t i = 0; i < strlen(s); ++i) {
-                const char c = s[i];
-
-                if (term_checkspecial(term, c))
-                        continue;
-
-                term_autowrap(term);
-
-                term_putentryat(term, c);
-                term->column++;
-        }
+        for (size_t i = 0; i < strlen(s); ++i)
+                term_putchr(term, s[i]);
 }
