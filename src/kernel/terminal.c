@@ -17,9 +17,7 @@ struct terminal term_init(void)
                 .buffer = (uint16_t *)0xB8000,
         };
 
-        for (size_t y = 0; y < term.height; ++y)
-                for (size_t x = 0; x < term.width; ++x)
-                        term_putentry(&term, ' ');
+        term_clear(&term);
 
         return term;
 }
@@ -58,11 +56,7 @@ static void term_move_char_up(struct terminal *term, const size_t x,
 {
         const size_t oldi = getbufidx(x, y, term->width);
         const size_t newi = getbufidx(x, y - 1, term->width);
-        const uint16_t *old = &(term->buffer[oldi]);
-        const uint16_t *new = &(term->buffer[newi]);
         term->buffer[newi] = term->buffer[oldi];
-
-        //*old = *new;
 }
 
 static void term_scrolldown(struct terminal *term)
@@ -109,6 +103,12 @@ static void term_autowrap(struct terminal *term)
                 term_newline(term);
 }
 
+static void term_putentryat(struct terminal *term, const char c, const size_t x,
+                            const size_t y)
+{
+        term->buffer[getbufidx(x, y, term->width)] = vga_entry(c, term->color);
+}
+
 void term_putentry(struct terminal *term, const char c)
 {
         term->buffer[term_getbufidx(term)] = vga_entry(c, term->color);
@@ -140,13 +140,17 @@ void term_putstr(struct terminal *term, const char *s)
                 term_putchr(term, s[i]);
 }
 
-void term_puterr(struct terminal *term, const char *msg)
+void term_putstr_rgb(struct terminal *term, const char *s, enum vga_color color)
 {
         const uint8_t saved = (uint8_t)term->color;
-
-        term->color = VGA_COLOR_LIGHT_RED;
-        term_putstr(term, "ERROR");
+        term->color = (uint8_t)color;
+        term_putstr(term, s);
         term->color = saved;
+}
+
+void term_puterr(struct terminal *term, const char *msg)
+{
+        term_putstr_rgb(term, "ERROR", VGA_COLOR_LIGHT_RED);
         term_putstr(term, ": ");
         term_putstr(term, msg);
 }
@@ -156,11 +160,18 @@ void term_putcmdprefix(struct terminal *term)
         if (term->column != 0)
                 term_newline(term);
 
-        const uint8_t saved = (uint8_t)term->color;
-
         term_putstr(term, "> ");
-        term->color = VGA_COLOR_LIGHT_GREEN;
-        term_putchr(term, '$');
-        term->color = saved;
+        term_putstr_rgb(term, "$", VGA_COLOR_LIGHT_GREEN);
         term_putstr(term, " ");
+}
+
+void term_clear(struct terminal *term)
+{
+        for (size_t y = 0; y < term->height; ++y)
+                for (size_t x = 0; x < term->width; ++x)
+                        term_putentryat(term, ' ', x, y);
+
+        term->column = 0;
+        term->row = 0;
+        term_updatecursor(term);
 }

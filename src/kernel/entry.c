@@ -24,7 +24,7 @@ extern void kernel_main(void)
 
         struct shell shell = shell_init(term);
 
-        PUTSTR("Success..\n");
+        PUTSTR("Success.\n");
         PUTSTR("\n");
 
         print_welcome_message(term);

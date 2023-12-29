@@ -116,6 +116,8 @@ int shell_process_command(struct shell *shell, const char *input)
                         if (i != arg_count)
                                 term_putchr(term, ' ');
                 }
+        } else if (strequ(cmd, "clear")) {
+                term_clear(term);
         } else {
                 term_puterr(term, "invalid command: '");
                 term_putstr(term, cmd);
