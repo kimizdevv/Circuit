@@ -2,32 +2,36 @@
 
 _Bool strequ(const char *s1, const char *s2)
 {
-        for (size_t i = 0; i <= strlen(s1); ++i)
-                if (s1[i] != s2[i])
-                        return 0;
-        return 1;
+        while (*s1 && (*s1 == *s2)) {
+                s1++;
+                s2++;
+        }
+
+        return *(unsigned char *)s1 == *(unsigned char *)s2;
 }
 
 size_t strlen(const char *s)
 {
         size_t len = 0;
+
         while (s[len])
                 len++;
+
         return len;
 }
 
 char *strcpy(char *dst, const char *src)
 {
-        for (size_t i = 0; i <= strlen(src); ++i)
-                dst[i] = src[i];
+        do {
+                *dst++ = *src++;
+        } while (*src != 0);
 
         return dst;
 }
 
 void strclr(char *s)
 {
-        char *c = s;
         do {
-                *c++ = 0;
-        } while (*c != 0);
+                *s++ = 0;
+        } while (*s != 0);
 }
