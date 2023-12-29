@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 struct terminal {
+        int backspace_limit;
         size_t width, height;
         size_t row, column;
         uint8_t color;
@@ -13,10 +14,16 @@ struct terminal {
 
 struct terminal term_init(void);
 
-void term_putentryat(struct terminal *term, char c);
+void term_movecursor(struct terminal *term, uint8_t x, uint8_t y);
+
+void term_putentry(struct terminal *term, char c);
 
 void term_putchr(struct terminal *term, char c);
 
 void term_putstr(struct terminal *term, const char *s);
+
+void term_puterr(struct terminal *term, const char *msg);
+
+void term_putcmdprefix(struct terminal *term);
 
 #endif

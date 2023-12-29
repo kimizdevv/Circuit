@@ -19,6 +19,6 @@ void shell_await_input_str(struct shell *shell, char *buf, size_t max,
 
 void shell_await_command(struct shell *shell);
 
-int shell_process_command(const char *input);
+int shell_process_command(struct shell *shell, const char *input);
 
 #endif

@@ -10,6 +10,21 @@ const char scancode_to_ascii[] = {
         '6',  '+',  '1', '2', '3', '0', '.', 0,   0,   0
 };
 
+const char shifted_scancode_to_ascii[] = {
+        0,    0,    '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',  '(',  ')',
+        '_',  '+',  0,    0x09, 'Q',  'W',  'E',  'R',  'T',  'Y',  'U',  'I',
+        'O',  'P',  '{',  '}',  0,    0,    'A',  'S',  'D',  'F',  'G',  'H',
+        'J',  'K',  'L',  ':',  '"',  '~',  0,    '|',  'Z',  'X',  'C',  'V',
+        'B',  'N',  'M',  '<',  '>',  '?',  0,    '*',  0x0F, ' ',  0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0x1B, 0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0x0E, 0x1C, 0,    0,    0,
+        0,    0,    0,    0,    0,    '?',  0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0,
+        0,    0,    0,    0,    0,    0,    0,    0x2C
+};
+
 inline uint8_t inb(uint16_t port)
 {
         uint8_t data;
@@ -24,6 +39,15 @@ inline void outb(uint16_t port, uint8_t data)
 
 char ascii_from_scancode(uint8_t sc)
 {
-        return (char)(sc < sizeof scancode_to_ascii ? scancode_to_ascii[sc] :
-                                                      0);
+        const _Bool shift = inb(KEYBOARD_DATA_PORT) == 42;
+        // ^ FIXME
+
+        const char ret = (char)(sc < sizeof scancode_to_ascii ?
+                                        scancode_to_ascii[sc] :
+                                        0);
+        const char shifted_ret = (char)(sc < sizeof shifted_scancode_to_ascii ?
+                                                shifted_scancode_to_ascii[sc] :
+                                                0);
+
+        return (char)(shift ? shifted_ret : ret);
 }
