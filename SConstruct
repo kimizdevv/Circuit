@@ -19,8 +19,16 @@ env['LINK'] = "i386-elf-gcc"
 env['LINKFLAGS'] = ["-T", link_ld_path, "-ffreestanding", "-nostdlib",  "-lgcc", "-O0"]
 
 objects = [
-    env.Object(target="bin/boot.o", source=["src/boot/boot.s"]),
-    env.Object(target="bin/kernel.o", source=["src/kernel/entry.c"])
+    # boot
+    env.Object(target="bin/boot.o", source="src/boot/boot.s"),
+
+    # libraries
+    env.Object(target="bin/string.o", source="src/lib/sys/string.c"),
+
+    # kernel
+    env.Object(target="bin/kernel.o", source="src/kernel/entry.c"),
+    env.Object(target="bin/vga.o", source="src/kernel/vga.c"),
+    env.Object(target="bin/terminal.o", source="src/kernel/terminal.c"),
 ]
 
 env.Program(target="target/boot/os.bin", source=objects)
