@@ -10,6 +10,17 @@ static void print_welcome_message(struct terminal *term)
         term->color = VGA_COLOR_WHITE;
         PUTSTR("=============================================================\n");
         PUTSTR("==                  Welcome to CircuitOS                   ==\n");
+        PUTSTR("== ------------------------------------------------------- ==\n");
+        PUTSTR("==            An operating system aiming to be             ==\n");
+        PUTSTR("==     extremely lightweight, performant and reliable      ==\n");
+        PUTSTR("==                    Fully open-source                    ==\n");
+        PUTSTR("== ------------------------------------------------------- ==\n");
+        PUTSTR("==                 Made as a hobby project                 ==\n");
+        PUTSTR("==            Designed to be used as an utility            ==\n");
+        PUTSTR("== ------------------------------------------------------- ==\n");
+        PUTSTR("==  NOT INTENDED FOR ENTERTAINMENT. ONLY FOR POWER USERS!  ==\n");
+        PUTSTR("==                                                         ==\n");
+        PUTSTR("==                                        kimizdevv@github ==\n");
         PUTSTR("=============================================================\n");
         PUTSTR("\n");
         term->color = VGA_COLOR_LIGHT_GREY;
