@@ -35,8 +35,10 @@ extern void kernel_main(void)
 
         struct shell shell = shell_init(term);
 
-        PUTSTR("Success.\n");
-        PUTSTR("\n");
+        PUTSTR("Success.\n\n");
+        PUTSTR("Circuit Operating System, Version ");
+        PUTSTR(CIRCUIT_SYSTEM_VERSION);
+        PUTSTR("\n\n");
 
         print_welcome_message(term);
 
