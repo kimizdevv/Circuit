@@ -13,8 +13,8 @@ struct terminal {
 
 struct terminal term_get(void);
 
-void term_putentryat(struct terminal term, char c, size_t x, size_t y);
+void term_putentryat(struct terminal term, char c);
 
-void term_putstr(struct terminal term, const char *s, size_t x, size_t y);
+void term_putstr(struct terminal term, const char *s);
 
 #endif

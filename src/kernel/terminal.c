@@ -18,22 +18,31 @@ struct terminal term_get(void)
 
         for (size_t y = 0; y < term.height; ++y)
                 for (size_t x = 0; x < term.width; ++x)
-                        term_putentryat(term, ' ', x, y);
+                        term_putentryat(term, ' ');
 
         return term;
 }
 
-void term_putentryat(struct terminal term, const char c, const size_t x,
-                     const size_t y)
+void term_putentryat(struct terminal term, const char c)
 {
-        term.buffer[y * term.width + x] = vga_entry(c, term.color);
+        const size_t idx = term.row * term.width + term.column;
+        term.buffer[idx] = vga_entry(c, term.color);
 }
 
-void term_putstr(struct terminal term, const char *s, const size_t x,
-                 const size_t y)
+static void term_autowrap(struct terminal term)
 {
-        // TODO: add text wrapping
+        if (term.column == term.width) {
+                term.column = 0;
+                term.row++;
+        }
+}
 
-        for (size_t i = 0; i < strlen(s); ++i)
-                term_putentryat(term, s[i], x + i, y);
+void term_putstr(struct terminal term, const char *s)
+{
+        for (size_t i = 0; i < strlen(s); ++i) {
+                term_autowrap(term);
+                term_putentryat(term, s[i]);
+
+                term.column++;
+        }
 }
