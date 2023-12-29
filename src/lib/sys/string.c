@@ -26,6 +26,8 @@ char *strcpy(char *dst, const char *src)
 
 void strclr(char *s)
 {
-        for (size_t i = 0; i < strlen(s); ++i)
-                s[i] = 0;
+        char *c = s;
+        do {
+                *c++ = 0;
+        } while (*c != 0);
 }
