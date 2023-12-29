@@ -11,9 +11,10 @@ target_path = "target/"
 env = Environment()
 
 OPT_LEVEL = "0"
+STDC = "2x"
 
 env['CC'] = "i386-elf-gcc"
-env['CCFLAGS'] = ["-ffreestanding", "-O" + OPT_LEVEL, "-Wall", "-Wextra", "-gdwarf"]
+env['CCFLAGS'] = ["-ffreestanding", "-O" + OPT_LEVEL, "-std=c" + STDC, "-Wall", "-Wextra", "-gdwarf"]
 
 env['AS'] = "i386-elf-as"
 env['ASFLAGS'] = ["-g"]
