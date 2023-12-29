@@ -1,0 +1,8 @@
+# build system
+.sconsign.dblite
+
+# binaries
+bin/
+target/
+circuit.iso
+
