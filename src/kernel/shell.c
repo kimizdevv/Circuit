@@ -53,11 +53,13 @@ void shell_await_input_str(struct shell *shell, char *buf, size_t max,
                 if (is_bs && i > 0) {
                         buf[--i] = 0;
                         term_putchr(shell->term, '\b');
-                } else if (!is_bs && print)
-                        term_putchr(shell->term, c);
+                }
 
-                if (is_bs)
+                if (is_bs || (c != '\n' && !is_chr_visible(c)))
                         continue;
+
+                if (print)
+                        term_putchr(shell->term, c);
 
                 if (c == '\n')
                         break;
@@ -90,15 +92,17 @@ static void interpret_command(const char *input,
                         if (len == 0)
                                 continue;
 
-                        strcpy(args[(*arg_count)++], buf);
+                        strncpy(args[(*arg_count)++], buf, len);
                         strclr(buf);
                         len = 0;
 
                         continue;
                 }
 
-                if (c == '\'')
+                if (c == '\'') {
                         enclosed = !enclosed;
+                        continue;
+                }
 
                 buf[len++] = c;
         }
