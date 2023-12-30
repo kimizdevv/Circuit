@@ -1,4 +1,10 @@
 #include "string.h"
+#include <stdint.h>
+
+_Bool is_chr_visible(const char c)
+{
+        return c >= 32 && c <= 126;
+}
 
 _Bool strequ(const char *s1, const char *s2)
 {
@@ -43,6 +49,17 @@ char *strcpy(char *dst, const char *src)
         do {
                 *dst++ = *src++;
         } while (*src != 0);
+        *dst = 0;
+
+        return dst;
+}
+
+char *strncpy(char *dst, const char *src, const size_t n)
+{
+        size_t i = 0;
+        for (; i < n; ++i)
+                dst[i] = src[i];
+        dst[i] = 0;
 
         return dst;
 }
@@ -52,6 +69,14 @@ void strclr(char *s)
         do {
                 *s++ = 0;
         } while (*s != 0);
+}
+
+void *memset(void *s, const int c, const size_t n)
+{
+        uint8_t *p = s;
+        for (size_t i = 0; i < n; ++i, *p++)
+                *p = (uint8_t)c;
+        return p;
 }
 
 int stoi(const char *s, int *status)
