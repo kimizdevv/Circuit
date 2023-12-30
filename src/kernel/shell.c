@@ -117,24 +117,41 @@ int shell_process_command(struct shell *shell, const char *input)
         size_t arg_count = 0;
         interpret_command(input, args, &arg_count);
 
-        const char *cmd = args[0];
+        char *cmd = args[0];
+        char cmd_org[strlen(cmd) + 1];
+        strcpy(cmd_org, cmd);
+        strtoupr(cmd);
 
-        if (strequ(cmd, "test")) {
+        if (strequ(cmd, "TEST")) {
                 term_putstr(term, "OK!");
-        } else if (strequ(cmd, "lengthy")) {
-                for (int c = '!'; c <= '~'; ++c)
-                        term_putchr(term, (char)c);
-        } else if (strequ(cmd, "echo")) {
+        } else if (strequ(cmd, "LENGTHY")) {
+                int status = 0;
+                const int nrep = arg_count > 1 ? stoi(args[1], &status) : 1;
+
+                if (status < 0) {
+                        term_puterr(term, "invalid number.");
+                        return -1;
+                }
+
+                if (nrep < 0) {
+                        term_puterr(term, "negative number not allowed.");
+                        return -2;
+                }
+
+                for (int i = 0; i < nrep; ++i)
+                        for (int c = '!'; c <= '~'; ++c)
+                                term_putchr(term, (char)c);
+        } else if (strequ(cmd, "ECHO")) {
                 for (size_t i = 1; i < arg_count; ++i) {
                         term_putstr(term, args[i]);
                         if (i != arg_count)
                                 term_putchr(term, ' ');
                 }
-        } else if (strequ(cmd, "clear")) {
+        } else if (strequ(cmd, "CLEAR")) {
                 term_clear(term);
         } else {
-                term_puterr(term, "invalid command: '");
-                term_putstr(term, cmd);
+                term_puterr(term, "invalid command '");
+                term_putstr(term, cmd_org);
                 term_putstr(term, "'.\n");
         }
 

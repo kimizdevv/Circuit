@@ -71,7 +71,7 @@ static void term_updatecursor(struct terminal *term)
         term_movecursor(term, (uint8_t)term->column, (uint8_t)term->row);
 }
 
-static void term_newline(struct terminal *term)
+void term_newline(struct terminal *term)
 {
         term->column = 0;
 
@@ -150,7 +150,7 @@ void term_putstr_rgb(struct terminal *term, const char *s, enum vga_color color)
 
 void term_puterr(struct terminal *term, const char *msg)
 {
-        term_putstr_rgb(term, "ERROR", VGA_COLOR_LIGHT_RED);
+        term_putstr_rgb(term, "error", VGA_COLOR_LIGHT_RED);
         term_putstr(term, ": ");
         term_putstr(term, msg);
 }
