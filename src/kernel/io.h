@@ -9,6 +9,6 @@ uint8_t inb(uint16_t port);
 
 void outb(uint16_t port, uint8_t data);
 
-char ascii_from_scancode(uint8_t sc);
+char ascii_from_scancode(uint8_t sc, _Bool shifted);
 
 #endif

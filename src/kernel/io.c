@@ -25,23 +25,20 @@ const char shifted_scancode_to_ascii[] = {
         0,    0,    0,    0,    0,    0,    0,    0x2C
 };
 
-inline uint8_t inb(uint16_t port)
+inline uint8_t inb(const uint16_t port)
 {
         uint8_t data;
         __asm__ volatile("inb %1, %0" : "=a"(data) : "dN"(port));
         return data;
 }
 
-inline void outb(uint16_t port, uint8_t data)
+inline void outb(const uint16_t port, const uint8_t data)
 {
         __asm__ volatile("outb %0, %1" : : "a"(data), "Nd"(port));
 }
 
-char ascii_from_scancode(uint8_t sc)
+char ascii_from_scancode(const uint8_t sc, const _Bool shifted)
 {
-        const _Bool shift = inb(KEYBOARD_DATA_PORT) == 42;
-        // ^ FIXME
-
         const char ret = (char)(sc < sizeof scancode_to_ascii ?
                                         scancode_to_ascii[sc] :
                                         0);
@@ -49,5 +46,5 @@ char ascii_from_scancode(uint8_t sc)
                                                 shifted_scancode_to_ascii[sc] :
                                                 0);
 
-        return (char)(shift ? shifted_ret : ret);
+        return (char)(shifted ? shifted_ret : ret);
 }

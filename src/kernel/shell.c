@@ -6,6 +6,8 @@
 #define MAX_ARGS 8
 #define MAX_ARG_LEN 64
 
+static _Bool shift_pressed = 0;
+
 struct shell shell_init(struct terminal *term)
 {
         struct shell shell = {
@@ -20,7 +22,19 @@ void shell_await_input(char *c)
                 for (; !(inb(0x64) & 1);)
                         ;
 
-                char temp = ascii_from_scancode(inb(KEYBOARD_DATA_PORT));
+                const uint8_t sc = inb(KEYBOARD_DATA_PORT);
+
+                // check shift
+                if (shift_pressed == 1 && (sc & 0x80) && (sc & 0x7F) == 42) {
+                        shift_pressed = 0;
+                        continue;
+                }
+                if (sc == 42) {
+                        shift_pressed = 1;
+                        continue;
+                }
+
+                const char temp = ascii_from_scancode(sc, shift_pressed);
                 if (temp == 0)
                         continue;
 
