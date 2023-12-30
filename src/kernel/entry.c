@@ -9,7 +9,7 @@ static void print_welcome_message(struct terminal *term)
 {
         term->color = VGA_COLOR_WHITE;
         PUTSTR("=============================================================\n");
-        PUTSTR("==                  Welcome to CircuitOS                   ==\n");
+        PUTSTR("==                        CircuitOS                        ==\n");
         PUTSTR("== ------------------------------------------------------- ==\n");
         PUTSTR("==            An operating system aiming to be             ==\n");
         PUTSTR("==     extremely lightweight, performant and reliable      ==\n");
