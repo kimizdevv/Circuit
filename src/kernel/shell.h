@@ -5,6 +5,9 @@
 
 #define MAX_CMD_LEN 128
 
+#define MAX_ARGS 8
+#define MAX_ARG_LEN 64
+
 struct shell {
         // TODO: a single shell shouldn't be limited to just one terminal
         struct terminal *term;

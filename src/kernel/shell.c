@@ -1,10 +1,8 @@
 #include "shell.h"
+#include "shellcmds.h"
 #include "terminal.h"
 #include "io.h"
 #include "../lib/sys/string.h"
-
-#define MAX_ARGS 8
-#define MAX_ARG_LEN 64
 
 static _Bool shift_pressed = 0;
 
@@ -114,45 +112,37 @@ int shell_process_command(struct shell *shell, const char *input)
         struct terminal *term = shell->term;
 
         char args[MAX_ARGS][MAX_ARG_LEN] = { 0 };
-        size_t arg_count = 0;
-        interpret_command(input, args, &arg_count);
+        size_t argc = 0;
+        interpret_command(input, args, &argc);
 
         char *cmd = args[0];
         char cmd_org[strlen(cmd) + 1];
         strcpy(cmd_org, cmd);
         strtoupr(cmd);
 
-        if (strequ(cmd, "TEST")) {
-                term_putstr(term, "OK!");
-        } else if (strequ(cmd, "LENGTHY")) {
-                int status = 0;
-                const int nrep = arg_count > 1 ? stoi(args[1], &status) : 1;
+        int (*shcmd)(struct shell *, const char[MAX_ARGS][MAX_ARG_LEN],
+                     size_t) = NULL;
 
-                if (status < 0) {
-                        term_puterr(term, "invalid number.");
-                        return -1;
-                }
+        if (strequ(cmd, "TEST"))
+                shcmd = shcmd_test;
 
-                if (nrep < 0) {
-                        term_puterr(term, "negative number not allowed.");
-                        return -2;
-                }
+        else if (strequ(cmd, "LENGTHY"))
+                shcmd = shcmd_lengthy;
 
-                for (int i = 0; i < nrep; ++i)
-                        for (int c = '!'; c <= '~'; ++c)
-                                term_putchr(term, (char)c);
-        } else if (strequ(cmd, "ECHO")) {
-                for (size_t i = 1; i < arg_count; ++i) {
-                        term_putstr(term, args[i]);
-                        if (i != arg_count)
-                                term_putchr(term, ' ');
-                }
-        } else if (strequ(cmd, "CLEAR")) {
-                term_clear(term);
-        } else {
+        else if (strequ(cmd, "ECHO"))
+                shcmd = shcmd_echo;
+
+        else if (strequ(cmd, "CLEAR"))
+                shcmd = shcmd_clear;
+
+        else {
                 term_puterr(term, "invalid command '");
                 term_putstr(term, cmd_org);
                 term_putstr(term, "'.\n");
+        }
+
+        if (shcmd) {
+                shcmd(shell, args, argc);
         }
 
         return 0;
