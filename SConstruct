@@ -32,9 +32,10 @@ objects = [
     # kernel
     env.Object(target="bin/kernel.o", source="src/kernel/entry.c"),
     env.Object(target="bin/vga.o", source="src/kernel/vga.c"),
+    env.Object(target="bin/io.o", source="src/kernel/io.c"),
     env.Object(target="bin/terminal.o", source="src/kernel/terminal.c"),
     env.Object(target="bin/shell.o", source="src/kernel/shell.c"),
-    env.Object(target="bin/io.o", source="src/kernel/io.c"),
+    env.Object(target="bin/shellcmds.o", source="src/kernel/shellcmds.c"),
 ]
 
 env.Program(target="target/boot/os.bin", source=objects)
