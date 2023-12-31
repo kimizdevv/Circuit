@@ -6,6 +6,12 @@
 int shcmd_test(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
                size_t argc);
 
+int shcmd_welcome(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
+                  size_t argc);
+
+int shcmd_help(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
+               size_t argc);
+
 int shcmd_lengthy(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
                   size_t argc);
 

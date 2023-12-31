@@ -1,8 +1,17 @@
 #ifndef INCLUDE_ENTRY_H
 #define INCLUDE_ENTRY_H
 
-#define CIRCUIT_SYSTEM_VERSION "0.0.2-DEV"
+#define CIRCUIT_SYSTEM_VERSION "0.1.0-DEV"
 
-void kernel_main(void);
+#include <stdint.h>
+
+struct framebuffer {
+        uintptr_t bufadr;
+        uint32_t width;
+        uint32_t height;
+        uint32_t bpp;
+};
+
+void kernel_main(unsigned long magic, unsigned long addr);
 
 #endif

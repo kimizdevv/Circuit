@@ -3,6 +3,7 @@
 #include "../lib/sys/string.h"
 
 #define UNUSED(v) ((void)v)
+#define PUTSTR(S) term_putstr(shell->term, S)
 
 int shcmd_test(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
                size_t argc)
@@ -10,8 +11,43 @@ int shcmd_test(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
         UNUSED(args);
         UNUSED(argc);
 
-        term_putstr(shell->term, "OK!");
+        PUTSTR("OK!");
 
+        return 0;
+}
+
+int shcmd_welcome(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
+                  size_t argc)
+{
+        UNUSED(args);
+        UNUSED(argc);
+
+        union rgba saved = shell->term->fg;
+
+        shell->term->fg = to_rgba(0xa8a8a8);
+        PUTSTR("=============================================================\n");
+        PUTSTR("==                        CircuitOS                        ==\n");
+        PUTSTR("== ------------------------------------------------------- ==\n");
+        PUTSTR("==            An operating system aiming to be             ==\n");
+        PUTSTR("==      extremely lightweight, performant and reliable     ==\n");
+        PUTSTR("==                    Fully open-source                    ==\n");
+        PUTSTR("== ------------------------------------------------------- ==\n");
+        PUTSTR("==                 Made as a hobby project                 ==\n");
+        PUTSTR("==             Designed to be used as a utility            ==\n");
+        PUTSTR("== ------------------------------------------------------- ==\n");
+        PUTSTR("==  NOT INTENDED FOR ENTERTAINMENT. ONLY FOR POWER USERS!  ==\n");
+        PUTSTR("==                                                         ==\n");
+        PUTSTR("==                                        kimizdevv@github ==\n");
+        PUTSTR("=============================================================\n");
+        PUTSTR("\n");
+        shell->term->fg = saved;
+
+        return 0;
+}
+
+int shcmd_help(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
+               size_t argc)
+{
         return 0;
 }
 

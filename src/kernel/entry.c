@@ -1,37 +1,66 @@
 #include "entry.h"
 #include "terminal.h"
 #include "shell.h"
-#include "vga.h"
 
 #define PUTSTR(S) term_putstr(term, S)
 
-static void print_welcome_message(struct terminal *term)
-{
-        term->color = VGA_COLOR_WHITE;
-        PUTSTR("=============================================================\n");
-        PUTSTR("==                        CircuitOS                        ==\n");
-        PUTSTR("== ------------------------------------------------------- ==\n");
-        PUTSTR("==            An operating system aiming to be             ==\n");
-        PUTSTR("==      extremely lightweight, performant and reliable     ==\n");
-        PUTSTR("==                    Fully open-source                    ==\n");
-        PUTSTR("== ------------------------------------------------------- ==\n");
-        PUTSTR("==                 Made as a hobby project                 ==\n");
-        PUTSTR("==             Designed to be used as a utility            ==\n");
-        PUTSTR("== ------------------------------------------------------- ==\n");
-        PUTSTR("==  NOT INTENDED FOR ENTERTAINMENT. ONLY FOR POWER USERS!  ==\n");
-        PUTSTR("==                                                         ==\n");
-        PUTSTR("==                                        kimizdevv@github ==\n");
-        PUTSTR("=============================================================\n");
-        PUTSTR("\n");
-        term->color = VGA_COLOR_LIGHT_GREY;
-}
+#include "../boot/multiboot2.h"
+#include "../lib/sys/string.h"
+#include <stdint.h>
 
-extern void kernel_main(void)
+struct framebuffer fb;
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
+static void get_framebuffer_from_tag(struct multiboot_tag *tag,
+                                     struct framebuffer *framebuffer)
 {
-        struct terminal term_o = term_init();
+        struct multiboot_tag_framebuffer *tagfb =
+                (struct multiboot_tag_framebuffer *)tag;
+        framebuffer->bufadr = (uintptr_t)tagfb->common.framebuffer_addr;
+        framebuffer->width = tagfb->common.framebuffer_width;
+        framebuffer->height = tagfb->common.framebuffer_height;
+        framebuffer->bpp = tagfb->common.framebuffer_bpp;
+}
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
+extern void kernel_main(unsigned long magic, unsigned long addr)
+{
+        if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+                return;
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
+
+        for (struct multiboot_tag *tag = (struct multiboot_tag *)(addr + 8);
+             tag->type != MULTIBOOT_TAG_TYPE_END;
+             tag = (struct multiboot_tag *)((multiboot_uint8_t *)tag +
+                                            ((tag->size + 7) & ~7))) {
+                switch (tag->type) {
+                case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
+                        get_framebuffer_from_tag(tag, &fb);
+                        break;
+                default:
+                        break;
+                }
+        }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
+        struct terminal term_o = term_init(&fb);
         struct terminal *term = &term_o;
 
-        PUTSTR("Initiating shell...\n");
+        PUTSTR("Initiating shell...");
 
         struct shell shell = shell_init(term);
 
@@ -40,7 +69,7 @@ extern void kernel_main(void)
         PUTSTR(CIRCUIT_SYSTEM_VERSION);
         PUTSTR("\n\n");
 
-        print_welcome_message(term);
+        shell_process_command(&shell, "WELCOME");
 
         for (;;)
                 shell_await_command(&shell);

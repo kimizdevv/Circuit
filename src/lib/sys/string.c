@@ -110,3 +110,38 @@ int stoi(const char *s, int *status)
 
         return neg ? -res : res;
 }
+
+char *itos(int value, char *str, int *status)
+{
+        const _Bool neg = value < 0;
+        if (neg)
+                value *= -1;
+
+        size_t len = 0;
+        for (;;) {
+                const int d = value % 10;
+                value /= 10;
+                str[len++] = (char)(d + '0');
+
+                if (value == 0)
+                        break;
+        }
+
+        if (len > 1)
+                for (size_t i = neg; i < (len + neg) / 2; ++i) {
+                        const size_t ri = len - 1 - i;
+                        if (ri == i)
+                                continue;
+                        const char t = str[i];
+                        str[i] = str[ri];
+                        str[ri] = t;
+                }
+
+        if (neg)
+                str[0] = '-';
+
+        str[len] = 0;
+
+        *status = 0;
+        return str;
+}

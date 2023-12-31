@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define MAX_CMD_LEN 128
+#define MAX_CMD_LEN 256
 
 #define MAX_ARGS 8
 #define MAX_ARG_LEN 64

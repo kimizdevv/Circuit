@@ -77,10 +77,9 @@ void shell_await_command(struct shell *shell)
 }
 
 static void interpret_command(const char *input,
-                              char args[MAX_ARGS][MAX_ARG_LEN],
-                              size_t *arg_count)
+                              char args[MAX_ARGS][MAX_ARG_LEN], size_t *argc)
 {
-        _Bool enclosed = 0; // is put in single quotes ''
+        char enclosed = 0; // is put in quotes '' or ""
 
         char buf[MAX_ARG_LEN] = { 0 };
         size_t len = 0;
@@ -92,15 +91,20 @@ static void interpret_command(const char *input,
                         if (len == 0)
                                 continue;
 
-                        strncpy(args[(*arg_count)++], buf, len);
+                        strncpy(args[(*argc)++], buf, len);
                         strclr(buf);
                         len = 0;
 
                         continue;
                 }
 
-                if (c == '\'') {
-                        enclosed = !enclosed;
+                const _Bool is_quot = c == '\'' || c == '"';
+                if (!enclosed && is_quot) {
+                        enclosed = c;
+                        continue;
+                }
+                if (enclosed == c) {
+                        enclosed = 0;
                         continue;
                 }
 
@@ -129,6 +133,12 @@ int shell_process_command(struct shell *shell, const char *input)
 
         if (strequ(cmd, "TEST"))
                 shcmd = shcmd_test;
+
+        else if (strequ(cmd, "WELCOME"))
+                shcmd = shcmd_welcome;
+
+        else if (strequ(cmd, "HELP"))
+                shcmd = shcmd_help;
 
         else if (strequ(cmd, "LENGTHY"))
                 shcmd = shcmd_lengthy;

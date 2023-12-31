@@ -20,5 +20,6 @@ void strclr(char *s);
 void *memset(void *s, int c, size_t n);
 
 int stoi(const char *s, int *status);
+char *itos(int value, char *str, int *status);
 
 #endif

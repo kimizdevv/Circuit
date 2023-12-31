@@ -1,20 +1,26 @@
 #include "terminal.h"
-#include "vga.h"
 #include "io.h"
+#include "psf.h"
 #include "../lib/sys/string.h"
 
-struct terminal term_init(void)
+#define FONTSTART _binary_src_fonts_lat9_16_psf_start
+
+extern char FONTSTART[];
+
+struct terminal term_init(struct framebuffer *fb)
 {
-        const size_t VGA_WIDTH = 80;
-        const size_t VGA_HEIGHT = 25;
+        // TODO: dont hard-code font dimensions
+        const uint32_t WIDTH = fb->width / 9;
+        const uint32_t HEIGHT = fb->height / 16;
 
         struct terminal term = {
-                .width = VGA_WIDTH,
-                .height = VGA_HEIGHT,
+                .width = WIDTH,
+                .height = HEIGHT,
                 .row = 0,
                 .column = 0,
-                .color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK),
-                .buffer = (uint16_t *)0xB8000,
+                .fg = to_rgba(0xFFa8a8a8),
+                .bg = to_rgba(0x000000),
+                .fb = fb,
         };
 
         term_clear(&term);
@@ -56,7 +62,7 @@ static void term_move_char_up(struct terminal *term, const size_t x,
 {
         const size_t oldi = getbufidx(x, y, term->width);
         const size_t newi = getbufidx(x, y - 1, term->width);
-        term->buffer[newi] = term->buffer[oldi];
+        term->fb[newi] = term->fb[oldi];
 }
 
 static void term_scrolldown(struct terminal *term)
@@ -68,7 +74,7 @@ static void term_scrolldown(struct terminal *term)
 
 static void term_updatecursor(struct terminal *term)
 {
-        term_movecursor(term, (uint8_t)term->column, (uint8_t)term->row);
+        //term_movecursor(term, (uint8_t)term->column, (uint8_t)term->row);
 }
 
 void term_newline(struct terminal *term)
@@ -85,14 +91,14 @@ void term_newline(struct terminal *term)
 
 static void term_backspace(struct terminal *term)
 {
-        term->buffer[term_getbufidx(term) - 1] = vga_entry(' ', term->color);
-
         if (term->column > 0)
                 term->column--;
-        else if (term->column == 0) {
-                term->column = term->width;
+        else {
+                term->column = term->width - 1;
                 term->row--;
         }
+
+        term_clrchr_at(term, term->column, term->row);
 
         term_updatecursor(term);
 }
@@ -103,18 +109,61 @@ static void term_autowrap(struct terminal *term)
                 term_newline(term);
 }
 
-static void term_putentryat(struct terminal *term, const char c, const size_t x,
-                            const size_t y)
+inline void term_putpx(struct terminal *term, uint32_t x, uint32_t y,
+                       uint32_t color)
 {
-        term->buffer[getbufidx(x, y, term->width)] = vga_entry(c, term->color);
+        ((uint32_t *)(term->fb->bufadr))[x + y * term->fb->width] = color;
 }
 
-void term_putentry(struct terminal *term, const char c)
+// https://wiki.osdev.org/PC_Screen_Font
+void term_putchr_at(struct terminal *term, const unsigned short int c,
+                    const uint32_t cx, const uint32_t cy)
 {
-        term->buffer[term_getbufidx(term)] = vga_entry(c, term->color);
+        const struct framebuffer *fb = term->fb;
+        const uint32_t scanline = fb->width * fb->bpp;
+
+        const PSF_font *font = (PSF_font *)&FONTSTART;
+
+        if (font->magic != PSF_FONT_MAGIC || font->version != 0)
+                return;
+
+        const uint32_t bytesperline = (font->width + 7) / 8;
+
+        const unsigned char *glyph =
+                (unsigned char *)&FONTSTART + font->headersize +
+                (size_t)(c > 0 && c < font->numglyph ? c : 0) *
+                        font->bytesperglyph;
+
+        uint64_t offs =
+                ((unsigned long)cy * font->height * scanline) +
+                ((unsigned long)cx * (font->width + 1) * sizeof(uint32_t));
+
+        uint16_t x;
+        uint16_t y;
+        uint64_t line;
+        uint32_t mask;
+        for (y = 0; y < font->height; y++) {
+                line = offs;
+                mask = 1 << (font->width - 1);
+
+                for (x = 0; x < font->width; x++) {
+                        term_putpx(term, cx * 9 + x, cy * 16 + y,
+                                   *((unsigned char *)glyph) & mask ?
+                                           term->fg.v :
+                                           term->bg.v);
+
+                        /* adjust to the next pixel */
+                        mask >>= 1;
+                        line += sizeof(uint32_t);
+                }
+
+                /* adjust to the next line */
+                glyph += bytesperline;
+                offs += scanline;
+        }
 }
 
-void term_putchr(struct terminal *term, const char c)
+void term_putchr(struct terminal *term, const unsigned short int c)
 {
         if (c == '\n') {
                 term_newline(term);
@@ -126,8 +175,7 @@ void term_putchr(struct terminal *term, const char c)
                 return;
         }
 
-        term_putentry(term, c);
-        term->column++;
+        term_putchr_at(term, c, term->column++, term->row);
 
         term_autowrap(term);
 
@@ -137,20 +185,20 @@ void term_putchr(struct terminal *term, const char c)
 void term_putstr(struct terminal *term, const char *s)
 {
         for (size_t i = 0; i < strlen(s); ++i)
-                term_putchr(term, s[i]);
+                term_putchr(term, (unsigned short)s[i]);
 }
 
-void term_putstr_rgb(struct terminal *term, const char *s, enum vga_color color)
+void term_putstr_rgb(struct terminal *term, const char *s, union rgba color)
 {
-        const uint8_t saved = (uint8_t)term->color;
-        term->color = (uint8_t)color;
+        const union rgba saved = term->fg;
+        term->fg = color;
         term_putstr(term, s);
-        term->color = saved;
+        term->fg = saved;
 }
 
 void term_puterr(struct terminal *term, const char *msg)
 {
-        term_putstr_rgb(term, "error", VGA_COLOR_LIGHT_RED);
+        term_putstr_rgb(term, "error", from_rgb(230, 80, 80));
         term_putstr(term, ": ");
         term_putstr(term, msg);
 }
@@ -161,15 +209,23 @@ void term_putcmdprefix(struct terminal *term)
                 term_newline(term);
 
         term_putstr(term, "> ");
-        term_putstr_rgb(term, "$", VGA_COLOR_LIGHT_GREEN);
+        term_putstr_rgb(term, "$", from_rgb(40, 230, 80));
         term_putstr(term, " ");
+}
+
+void term_clrchr_at(struct terminal *term, uint32_t cx, uint32_t cy)
+{
+        for (uint32_t y = cy * 16; y <= cy * 16 + 16; ++y)
+                for (uint32_t x = cx * 9; x <= cx * 9 + 9; ++x)
+                        term_putpx(term, x, y, term->bg.v);
 }
 
 void term_clear(struct terminal *term)
 {
-        for (size_t y = 0; y < term->height; ++y)
-                for (size_t x = 0; x < term->width; ++x)
-                        term_putentryat(term, ' ', x, y);
+        // TODO: optimize
+        for (uint32_t y = 0; y < term->height; ++y)
+                for (uint32_t x = 0; x < term->width; ++x)
+                        term_clrchr_at(term, x, y);
 
         term->column = 0;
         term->row = 0;
