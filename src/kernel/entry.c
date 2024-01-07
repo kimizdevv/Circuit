@@ -21,9 +21,12 @@ static void get_framebuffer_from_tag(struct multiboot_tag *tag,
         struct multiboot_tag_framebuffer *tagfb =
                 (struct multiboot_tag_framebuffer *)tag;
         framebuffer->bufadr = (uintptr_t)tagfb->common.framebuffer_addr;
+        framebuffer->pitch = tagfb->common.framebuffer_pitch;
         framebuffer->width = tagfb->common.framebuffer_width;
         framebuffer->height = tagfb->common.framebuffer_height;
         framebuffer->bpp = tagfb->common.framebuffer_bpp;
+        framebuffer->type = tagfb->common.framebuffer_type;
+        framebuffer->ncol = tagfb->framebuffer_palette_num_colors;
 }
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -65,6 +68,23 @@ extern void kernel_main(unsigned long magic, unsigned long addr)
         struct shell shell = shell_init(term);
 
         PUTSTR("Success.\n\n");
+
+        char buf[16];
+
+        PUTSTR("VIDEO (");
+        PUTSTR(itos((int)fb.type, buf, NULL));
+        PUTSTR("): ");
+        PUTSTR(itos((int)fb.width, buf, NULL));
+        PUTSTR("x");
+        PUTSTR(itos((int)fb.height, buf, NULL));
+        PUTSTR("x");
+        PUTSTR(itos((int)fb.bpp, buf, NULL));
+        PUTSTR(", ADR (TRIM): ");
+        PUTSTR(itos((int)fb.bufadr, buf, NULL));
+        PUTSTR(", PALETTE: ");
+        PUTSTR(itos((int)fb.ncol, buf, NULL));
+        PUTSTR("\n\n");
+
         PUTSTR("Circuit Operating System, Version ");
         PUTSTR(CIRCUIT_SYSTEM_VERSION);
         PUTSTR("\n\n");
