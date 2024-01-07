@@ -124,6 +124,9 @@ int shell_process_command(struct shell *shell, const char *input)
         interpret_command(input, args, &argc);
 
         char *cmd = args[0];
+        if (strlen(cmd) == 0)
+                return 0;
+
         char cmd_org[strlen(cmd) + 1];
         strcpy(cmd_org, cmd);
         strtoupr(cmd);

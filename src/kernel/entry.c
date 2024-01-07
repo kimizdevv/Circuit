@@ -60,7 +60,7 @@ extern void kernel_main(unsigned long magic, unsigned long addr)
         struct terminal term_o = term_init(&fb);
         struct terminal *term = &term_o;
 
-        PUTSTR("Initiating shell...");
+        PUTSTR("Initiating shell...\n");
 
         struct shell shell = shell_init(term);
 
