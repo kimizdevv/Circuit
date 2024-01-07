@@ -1,4 +1,5 @@
 #include "string.h"
+#include "math.h"
 #include <stdint.h>
 
 _Bool is_chr_visible(const char c)
@@ -117,7 +118,7 @@ char *itos(int value, char *str, int *status)
         if (neg)
                 value *= -1;
 
-        size_t len = 0;
+        size_t len = neg;
         for (;;) {
                 const int d = value % 10;
                 value /= 10;
@@ -128,8 +129,8 @@ char *itos(int value, char *str, int *status)
         }
 
         if (len > 1)
-                for (size_t i = neg; i < (len + neg) / 2; ++i) {
-                        const size_t ri = len - 1 - i;
+                for (size_t i = neg; i < len / 2 + neg; ++i) {
+                        const size_t ri = len - !neg - i;
                         if (ri == i)
                                 continue;
                         const char t = str[i];

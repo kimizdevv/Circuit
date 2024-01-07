@@ -152,6 +152,9 @@ int shell_process_command(struct shell *shell, const char *input)
         else if (strequ(cmd, "CLEAR"))
                 shcmd = shcmd_clear;
 
+        else if (strequ(cmd, "ITOS"))
+                shcmd = shcmd_itos;
+
         else {
                 term_puterr(term, "invalid command '");
                 term_putstr(term, cmd_org);

@@ -69,7 +69,7 @@ extern void kernel_main(unsigned long magic, unsigned long addr)
 
         PUTSTR("Success.\n\n");
 
-        char buf[16];
+        char buf[24] = { 0 };
 
         PUTSTR("VIDEO (");
         PUTSTR(itos((int)fb.type, buf, NULL));

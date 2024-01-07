@@ -21,4 +21,7 @@ int shcmd_echo(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
 int shcmd_clear(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
                 size_t argc);
 
+int shcmd_itos(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
+               size_t argc);
+
 #endif

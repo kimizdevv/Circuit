@@ -1,6 +1,7 @@
 #ifndef INCLUDE_STRING_H
 #define INCLUDE_STRING_H
 
+#include <stdint.h>
 #include <stddef.h>
 
 _Bool is_chr_visible(char c);

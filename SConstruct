@@ -36,6 +36,7 @@ objects = [
 
     # libraries
     env.Object(target="bin/string.o", source="src/lib/sys/string.c"),
+    env.Object(target="bin/math.o", source="src/lib/sys/math.c"),
     env.Object(target="bin/rgb.o", source="src/lib/sys/rgb.c"),
 
     # kernel

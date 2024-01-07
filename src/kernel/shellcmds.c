@@ -1,6 +1,7 @@
 #include "shellcmds.h"
 #include "terminal.h"
 #include "../lib/sys/string.h"
+#include "../lib/sys/math.h"
 
 #define UNUSED(v) ((void)v)
 #define PUTSTR(S) term_putstr(shell->term, S)
@@ -93,6 +94,31 @@ int shcmd_clear(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
         UNUSED(argc);
 
         term_clear(shell->term);
+
+        return 0;
+}
+
+int shcmd_itos(struct shell *shell, const char args[MAX_ARGS][MAX_ARG_LEN],
+               size_t argc)
+{
+        if (argc != 2) {
+                term_puterr(shell->term, "expected 1 argument.");
+                return -1;
+        }
+
+        int status = 0;
+        char st_buf[4] = { 0 };
+
+        char buf[16] = { 0 };
+        const char *n = args[1];
+
+        const int convd = stoi(n, NULL);
+        itos(convd, buf, &status);
+
+        term_putstr(shell->term, "(");
+        term_putstr(shell->term, itos(status, st_buf, NULL));
+        term_putstr(shell->term, "): ");
+        term_putstr(shell->term, buf);
 
         return 0;
 }
