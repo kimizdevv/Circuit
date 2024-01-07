@@ -60,16 +60,29 @@ void term_movecursor(struct terminal *term, const uint8_t x, const uint8_t y)
 static void term_move_char_up(struct terminal *term, const size_t x,
                               const size_t y)
 {
-        const size_t oldi = getbufidx(x, y, term->width);
-        const size_t newi = getbufidx(x, y - 1, term->width);
-        term->fb[newi] = term->fb[oldi];
+        uint32_t *buf = (uint32_t *)term->fb->bufadr;
+        const size_t fw = term->fb->width;
+
+        for (size_t py = 0; py < 16; ++py)
+                for (size_t px = 0; px < 9; ++px) {
+                        const size_t oldi = getbufidx(x + px, y + py, fw);
+                        const size_t newi = getbufidx(x + px, y - 16 + py, fw);
+
+                        buf[newi] = buf[oldi];
+                }
+
+        //const size_t oldi = getbufidx(x, y, term->width);
+        //const size_t newi = getbufidx(x, y - 1, term->width);
+        //term->fb[newi] = term->fb[oldi];
 }
 
 static void term_scrolldown(struct terminal *term)
 {
-        for (size_t y = 1; y <= term->height; ++y)
-                for (size_t x = 0; x < term->width; ++x)
-                        term_move_char_up(term, x, y);
+        const size_t w = term->width;
+        const size_t h = term->height;
+        for (size_t y = 1; y <= h; ++y)
+                for (size_t x = 0; x < w; ++x)
+                        term_move_char_up(term, x * 9, y * 16);
 }
 
 static void term_updatecursor(struct terminal *term)
