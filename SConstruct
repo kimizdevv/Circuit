@@ -10,18 +10,18 @@ target_path = "target/"
 srcfonts = "src/fonts/"
 binfonts = "bin/fonts/"
 
-env = Environment()
+env = Environment(ENV = os.environ)
 
 OPT_LEVEL = "0"
 STDC = "2x"
 
-env['CC'] = "i386-elf-gcc"
+env['CC'] = "i686-elf-gcc"
 env['CCFLAGS'] = ["-ffreestanding", "-O" + OPT_LEVEL, "-std=c" + STDC, "-Wall", "-Wextra", "-gdwarf"]
 
-env['AS'] = "i386-elf-gcc"
+env['AS'] = "i686-elf-gcc"
 env['ASFLAGS'] = ["-ffreestanding", "-O" + OPT_LEVEL, "-Wall", "-Wextra", "-gdwarf"]
 
-env['LINK'] = "i386-elf-gcc"
+env['LINK'] = "i686-elf-gcc"
 env['LINKFLAGS'] = ["-T", link_ld_path, "-ffreestanding", "-nostdlib",  "-lgcc", "-O" + OPT_LEVEL, "-gdwarf"]
 
 env_nasm = Environment()
