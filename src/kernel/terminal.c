@@ -116,7 +116,7 @@ inline void term_putpx(struct terminal *term, uint32_t x, uint32_t y,
 }
 
 // https://wiki.osdev.org/PC_Screen_Font
-void term_putchr_at(struct terminal *term, const unsigned short int c,
+void term_putchr_at(struct terminal *term, const unsigned char c,
                     const uint32_t cx, const uint32_t cy)
 {
         const struct framebuffer *fb = term->fb;
@@ -163,7 +163,7 @@ void term_putchr_at(struct terminal *term, const unsigned short int c,
         }
 }
 
-void term_putchr(struct terminal *term, const unsigned short int c)
+void term_putchr(struct terminal *term, const char c)
 {
         if (c == '\n') {
                 term_newline(term);
@@ -175,7 +175,7 @@ void term_putchr(struct terminal *term, const unsigned short int c)
                 return;
         }
 
-        term_putchr_at(term, c, term->column++, term->row);
+        term_putchr_at(term, (unsigned char)c, term->column++, term->row);
 
         term_autowrap(term);
 
@@ -185,7 +185,7 @@ void term_putchr(struct terminal *term, const unsigned short int c)
 void term_putstr(struct terminal *term, const char *s)
 {
         for (size_t i = 0; i < strlen(s); ++i)
-                term_putchr(term, (unsigned short)s[i]);
+                term_putchr(term, s[i]);
 }
 
 void term_putstr_rgb(struct terminal *term, const char *s, union rgba color)

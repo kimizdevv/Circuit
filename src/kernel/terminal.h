@@ -22,10 +22,10 @@ void term_newline(struct terminal *term);
 
 void term_putpx(struct terminal *term, uint32_t x, uint32_t y, uint32_t color);
 
-void term_putchr_at(struct terminal *term, unsigned short int c, uint32_t cx,
+void term_putchr_at(struct terminal *term, unsigned char c, uint32_t cx,
                     uint32_t cy);
 
-void term_putchr(struct terminal *term, unsigned short int c);
+void term_putchr(struct terminal *term, char c);
 
 void term_putstr(struct terminal *term, const char *s);
 
