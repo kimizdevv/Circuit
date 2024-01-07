@@ -80,6 +80,43 @@ void *memset(void *s, const int c, const size_t n)
         return p;
 }
 
+void *memcpy(void *dst, const void *src, const size_t n)
+{
+        size_t i;
+
+        /*
+        * memcpy does not support overlapping buffers, so always do it
+        * forwards. (Don't change this without adjusting memmove.)
+        *
+        * For speedy copying, optimize the common case where both pointers
+        * and the length are word-aligned, and copy word-at-a-time instead
+        * of byte-at-a-time. Otherwise, copy by bytes.
+        *
+        * The alignment logic below should be portable. We rely on
+        * the compiler to be reasonably intelligent about optimizing
+        * the divides and modulos out. Fortunately, it is.
+        */
+
+        if ((uintptr_t)dst % sizeof(long) == 0 &&
+            (uintptr_t)src % sizeof(long) == 0 && n % sizeof(long) == 0) {
+                long *d = dst;
+                const long *s = src;
+
+                for (i = 0; i < n / sizeof(long); i++) {
+                        d[i] = s[i];
+                }
+        } else {
+                char *d = dst;
+                const char *s = src;
+
+                for (i = 0; i < n; i++) {
+                        d[i] = s[i];
+                }
+        }
+
+        return dst;
+}
+
 int stoi(const char *s, int *status)
 {
         int res = 0;

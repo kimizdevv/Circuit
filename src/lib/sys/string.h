@@ -19,6 +19,7 @@ char *strncpy(char *dst, const char *src, size_t n);
 void strclr(char *s);
 
 void *memset(void *s, int c, size_t n);
+void *memcpy(void *dst, const void *src, size_t n);
 
 int stoi(const char *s, int *status);
 char *itos(int value, char *str, int *status);
