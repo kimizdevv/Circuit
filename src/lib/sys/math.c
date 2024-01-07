@@ -7,6 +7,7 @@ double dmod(double x, double y)
         return x - (int)(x / y) * y;
 }
 
+// https://stackoverflow.com/questions/35968963/trying-to-calculate-logarithm-base-10-without-math-h-really-close-just-having
 double ln(const double x)
 {
         double old_sum = 0.0;
